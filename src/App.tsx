@@ -92,8 +92,12 @@ const topLinks = [
 ];
 
 /* -------------------- Components -------------------- */
+const isTouch =
+  typeof window !== "undefined" &&
+  window.matchMedia("(hover: none), (pointer: coarse)").matches;
 
 function CustomCursor() {
+  if (isTouch) return null;
   const dot = useRef<HTMLDivElement>(null);
   const ring = useRef<HTMLDivElement>(null);
   const label = useRef<HTMLDivElement>(null);
