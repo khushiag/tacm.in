@@ -222,6 +222,266 @@ function StarField() {
   return <canvas ref={ref} className="fixed inset-0 pointer-events-none z-0" />;
 }
 
+/* 3D Earth — one full-screen shader pass, raw WebGL, no libraries.
+   Real coastlines come from a 21 KB 1-bit land map (Natural Earth 1:50m, public domain);
+   biomes, oceans, clouds and atmosphere are computed per pixel.
+   Drag to spin. Pauses off-screen; lowers resolution on slow devices. */
+const PLANET_VS = `attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }`;
+const PLANET_FS = `
+#ifdef GL_OES_standard_derivatives
+#extension GL_OES_standard_derivatives : enable
+#endif
+precision highp float;
+uniform vec2 uRes;
+uniform float uSpin, uCloud, uIntro, uTime;
+uniform vec2 uTilt;
+uniform sampler2D uMap;
+
+mat3 rotX(float a){ float c=cos(a), s=sin(a); return mat3(1.,0.,0., 0.,c,s, 0.,-s,c); }
+mat3 rotY(float a){ float c=cos(a), s=sin(a); return mat3(c,0.,-s, 0.,1.,0., s,0.,c); }
+mat3 rotZ(float a){ float c=cos(a), s=sin(a); return mat3(c,s,0., -s,c,0., 0.,0.,1.); }
+float hash(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
+float noise(vec3 p){
+  vec3 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+  return mix(mix(mix(hash(i), hash(i + vec3(1,0,0)), f.x), mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x), mix(hash(i + vec3(0,1,1)), hash(i + 1.), f.x), f.y), f.z);
+}
+const mat3 R = mat3(0.00, 0.80, 0.60, -0.80, 0.36, -0.48, -0.60, -0.48, 0.64);
+float fbm(vec3 p, int oct){ float v = 0., a = 0.5; for (int i = 0; i < 6; i++) { if (i >= oct) break; v += a * noise(p); p = R * p * 2.02; a *= 0.5; } return v; }
+vec2 sphere(vec3 ro, vec3 rd, vec3 c, float r){ vec3 o = ro - c; float b = dot(o, rd); float dd = sqrt(max(dot(o, o) - b * b, 0.)); return vec2(dd, -b - sqrt(max(r * r - dd * dd, 0.))); }
+float band(float x, float c, float w){ return exp(-pow((x - c) / w, 2.)); }
+
+void main(){
+  float m = min(uRes.x, uRes.y);
+  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / m;
+  float ease = 1. - pow(1. - uIntro, 3.);
+  float camZ = 3.9 + (1. - ease) * 1.6;                     // zoom-in on load
+  mat3 M = rotX(uTilt.x) * rotY(uTilt.y) * rotZ(0.41);      // world -> planet space (23.4° tilt)
+  vec3 ro = M * vec3(0., 0., camZ);
+  vec3 rd = M * normalize(vec3(uv, -1.25));
+  vec3 L  = M * normalize(vec3(-0.62, 0.3, 0.72));
+  float px = camZ / (1.25 * m);
+
+  vec3 sky = vec3(0.30, 0.58, 1.0), dusk = vec3(1.0, 0.45, 0.18);
+  vec3 col = vec3(0.); float alpha = 0.;
+
+  // ---- background moon ----
+  vec3 mc = M * vec3(1.35, 3.3, -4.5);
+  vec2 hm = sphere(ro, rd, mc, 0.32);
+  float aM = 1. - smoothstep(0.32 - px * 1.5, 0.32 + px * 1.5, hm.x);
+  if (aM > 0.) {
+    vec3 n = normalize(ro + rd * hm.y - mc);
+    float mare = smoothstep(0.45, 0.7, fbm(n * 2.5, 3));
+    vec3 mcol = vec3(0.72, 0.71, 0.70) * (1. - 0.35 * mare) * (0.85 + 0.3 * noise(n * 14.));
+    col = mcol * smoothstep(-0.05, 0.3, dot(n, L)) * aM; alpha = aM;
+  }
+
+  // ---- Earth ----
+  vec2 he = sphere(ro, rd, vec3(0.), 1.);
+  float dd = he.x;
+  float aE = 1. - smoothstep(1. - px, 1. + px, dd);
+  // surface point + map lookups run for every pixel (outside the branch below):
+  // texture/derivative calls inside divergent branches break on some GPU drivers
+  vec3 n = normalize(ro + rd * he.y);
+  vec3 ns = rotY(-uSpin) * n;                               // geographic frame (spins west→east)
+  float latR = asin(clamp(ns.y, -1., 1.)), alat = abs(latR);
+  float u = atan(-ns.z, ns.x) / 6.2831853 + 0.5, v = 0.5 - latR / 3.1415927;
+  float u2 = fract(u + 0.5) - 0.5;                          // Tarini's trick hides the ±180° seam
+  #ifdef GL_OES_standard_derivatives
+    if (fwidth(u) > fwidth(u2) + 1e-5) u = u2;
+  #endif
+  vec2 tc = vec2(u, v);
+  float raw = texture2D(uMap, tc).r;
+  float inland = texture2D(uMap, tc, 5.5).r;                // blurred mip = distance from coast
+  float shelf = texture2D(uMap, tc, 2.5).r;
+  if (aE > 0.) {
+    float ndl = dot(n, L), mu = max(dot(n, -rd), 0.);
+    float land = smoothstep(0.38, 0.62, raw);
+
+    // biomes from real latitude + how far inland
+    float detail = fbm(ns * 18., 4);
+    float arid = clamp(band(alat, 0.40, 0.16) * smoothstep(0.55, 0.9, inland) + band(alat, 0.75, 0.12) * smoothstep(0.85, 0.98, inland) * 0.8, 0., 1.);
+    arid = clamp(arid + (noise(ns * 6.) - 0.5) * 0.5, 0., 1.);
+    vec3 tropic = vec3(0.04, 0.14, 0.04), temperate = vec3(0.17, 0.24, 0.09), boreal = vec3(0.07, 0.15, 0.09), tundra = vec3(0.40, 0.38, 0.32), desert = vec3(0.72, 0.55, 0.33);
+    vec3 ground = mix(tropic, temperate, smoothstep(0.25, 0.55, alat));
+    ground = mix(ground, boreal, smoothstep(0.85, 0.95, alat));
+    ground = mix(ground, tundra, smoothstep(1.08, 1.18, alat));
+    ground = mix(ground, desert, smoothstep(0.35, 0.65, arid));
+    ground *= 0.7 + 0.6 * detail;
+
+    vec3 ocean = mix(vec3(0.004, 0.03, 0.10), vec3(0.03, 0.19, 0.30), smoothstep(0.15, 0.85, shelf) * 0.85);
+    float jitter = (noise(ns * 9.) - 0.5) * 0.12;
+    float landIce = land * smoothstep(1.12, 1.2, alat + jitter + inland * 0.06);   // Greenland, Antarctica
+    float seaIce = (1. - land) * smoothstep(1.3, 1.36, alat + jitter);              // Arctic pack ice
+    vec3 surf = mix(mix(ocean, ground, land), vec3(0.93, 0.96, 1.0) * (0.92 + 0.08 * detail), max(landIce, seaIce));
+
+    // clouds: swirling, latitude-stretched; more at the equator & storm tracks, fewer over subtropical highs
+    vec3 cp = rotY(-uCloud) * n;
+    float sw = fbm(cp * 2.2, 3);
+    vec3 cq = vec3(cp.x * 2.3, cp.y * 5.2, cp.z * 2.3) + sw * 1.6;
+    float bias = 0.07 * band(latR, 0.1, 0.12) + 0.07 * band(alat, 0.95, 0.22) - 0.08 * band(alat, 0.45, 0.15);
+    float cl = smoothstep(0.52 - bias, 0.78 - bias, fbm(cq, 5));
+    cl = max(cl, 0.35 * smoothstep(0.58, 0.8, fbm(cp * 7. + sw, 3)));
+
+    float day = smoothstep(-0.12, 0.4, ndl);
+    vec3 c = surf * day * (1. - 0.3 * cl);
+    vec3 H = normalize(L - rd);
+    float fres = 0.02 + 0.98 * pow(1. - mu, 5.);
+    float water = (1. - land) * (1. - seaIce) * (1. - cl);
+    c += vec3(1.0, 0.93, 0.82) * (pow(max(dot(n, H), 0.), 400.) * 1.2 + pow(max(dot(n, H), 0.), 14.) * 0.07 + fres * 0.15) * water * day;
+    c = mix(c, vec3(0.96, 0.97, 1.0) * (0.015 + 0.985 * smoothstep(-0.2, 0.5, ndl)), cl * 0.88);
+
+    // Manipal (13.35°N, 74.79°E): a soft gold pulse
+    vec3 home = vec3(cos(0.233) * cos(1.305), sin(0.233), -cos(0.233) * sin(1.305));
+    float hd = length(ns - home), ph = fract(uTime * 0.35);
+    float pin = exp(-pow(hd / 0.012, 2.)) + 0.6 * exp(-pow((hd - ph * 0.09) / 0.006, 2.)) * (1. - ph);
+    c += vec3(1.0, 0.75, 0.3) * pin * (1. - cl * 0.7) * (0.35 + 0.65 * day);
+
+    // atmosphere: blue limb, haze, sunset band on the terminator
+    vec3 atm = mix(sky, dusk, band(ndl, 0., 0.22) * 0.85);
+    c = mix(c, sky * day, (1. - mu) * 0.25);
+    c += atm * pow(1. - mu, 2.4) * smoothstep(-0.35, 0.45, ndl) * 0.9;
+    col = mix(col, c, aE); alpha = mix(alpha, 1., aE);
+  }
+
+  // ---- outer atmosphere halo ----
+  vec3 pc = normalize(ro - rd * dot(ro, rd));
+  float pl = dot(pc, L);
+  float halo = exp(-max(dd - 1., 0.) * 22.) * (1. - aE) * smoothstep(-0.45, 0.6, pl);
+  col += mix(sky, dusk, band(pl, 0., 0.28) * 0.8) * halo * 0.9; alpha += halo * 0.7;
+
+  col = 1. - exp(-col * 1.35);                              // filmic exposure
+  gl_FragColor = vec4(col, clamp(alpha, 0., 1.)) * smoothstep(0., 1., uIntro);
+}`;
+
+function PlanetCanvas() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = ref.current!;
+    const gl = c.getContext("webgl", { antialias: false, alpha: true, premultipliedAlpha: true, powerPreference: "low-power" });
+    if (!gl) return; // no WebGL → the CSS glow behind still shows
+    gl.getExtension("OES_standard_derivatives");
+
+    const sh = (type: number, src: string) => {
+      const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error("[Earth] shader error:", gl.getShaderInfoLog(s));
+      return s;
+    };
+    const prog = gl.createProgram()!;
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, PLANET_VS));
+    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, PLANET_FS));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.error("[Earth] link error:", gl.getProgramInfoLog(prog)); return; }
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW); // one big triangle
+    const loc = gl.getAttribLocation(prog, "p");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+    const U = (n: string) => gl.getUniformLocation(prog, n);
+    const uRes = U("uRes"), uSpin = U("uSpin"), uCloud = U("uCloud"), uIntro = U("uIntro"), uTime = U("uTime"), uTilt = U("uTilt");
+
+    // Land map: 1 black pixel placeholder until the 21 KB image arrives
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 1, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8Array([0]));
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    let ready = false, alive = true;
+    const img = new Image();
+    img.onload = () => {
+      if (!alive) return;
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, gl.LUMINANCE, gl.UNSIGNED_BYTE, img);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      ready = true;
+    };
+    img.onerror = () => { ready = true; }; // still show an ocean world
+    img.src = "/images/earth-land.png";
+
+    // Resolution: start at up to 1.5x, drop automatically if frames are slow
+    let scale = Math.min(devicePixelRatio || 1, 1.5);
+    const resize = () => {
+      c.width = Math.round(c.clientWidth * scale); c.height = Math.round(c.clientHeight * scale);
+      gl.viewport(0, 0, c.width, c.height);
+      gl.uniform2f(uRes, c.width, c.height);
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(c);
+
+    // Hover tilt + drag-to-spin with momentum
+    const BASE = 0.12, AUTO = 0.03;
+    const tilt = { x: BASE, y: 0 }, target = { x: BASE, y: 0 };
+    let spin = -3.05, vel = AUTO, dragging = false, lastX = 0;   // opens facing India
+    const host = c.parentElement!;
+    const onMove = (e: PointerEvent) => {
+      const b = c.getBoundingClientRect();
+      target.y = ((e.clientX - b.left) / b.width - 0.5) * 0.5;
+      target.x = BASE + ((e.clientY - b.top) / b.height - 0.5) * 0.25;
+      if (dragging) { const dx = e.clientX - lastX; lastX = e.clientX; spin += dx * 0.006; vel = dx * 0.006 * 60; }
+    };
+    const onDown = (e: PointerEvent) => { dragging = true; lastX = e.clientX; vel = 0; c.setPointerCapture(e.pointerId); };
+    const onUp = () => { dragging = false; };
+    host.addEventListener("pointermove", onMove);
+    c.addEventListener("pointerdown", onDown);
+    c.addEventListener("pointerup", onUp);
+    c.addEventListener("pointercancel", onUp);
+
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let raf = 0, last = 0, onScreen = true, intro = 0, cloud = 0, time = 0, slow = 0, frames = 0, start = 0;
+    const frame = (now: number) => {
+      const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
+      last = now;
+      if (ready) {
+        // adaptive quality: if frames average >24ms, render at lower resolution
+        if (dt > 0 && frames < 90) { frames++; slow += dt > 0.024 ? 1 : 0; if (frames === 90 && slow > 45 && scale > 0.75) { scale = Math.max(0.75, scale * 0.7); resize(); frames = 0; slow = 0; } }
+        if (!start) start = now;
+        intro = reduced ? 1 : Math.min(1, (now - start) / 1800);   // wall-clock, so slow devices don't drag it out
+        if (!reduced) {
+          if (!dragging) { vel += (AUTO - vel) * Math.min(1, dt * 1.5); spin += vel * dt; }
+          cloud += dt * 0.008; time += dt;
+        }
+      }
+      tilt.x += (target.x - tilt.x) * 0.05;
+      tilt.y += (target.y - tilt.y) * 0.05;
+      gl.uniform1f(uSpin, spin);
+      gl.uniform1f(uCloud, spin * 1.05 + cloud);
+      gl.uniform1f(uIntro, intro);
+      gl.uniform1f(uTime, time);
+      gl.uniform2f(uTilt, tilt.x, tilt.y);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      raf = onScreen && !document.hidden ? requestAnimationFrame(frame) : 0;
+    };
+    const resume = () => { if (!raf && onScreen && !document.hidden) { last = 0; raf = requestAnimationFrame(frame); } };
+    const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; resume(); });
+    io.observe(c);
+    document.addEventListener("visibilitychange", resume);
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      alive = false;
+      cancelAnimationFrame(raf);
+      io.disconnect(); ro.disconnect();
+      document.removeEventListener("visibilitychange", resume);
+      host.removeEventListener("pointermove", onMove);
+      c.removeEventListener("pointerdown", onDown);
+      c.removeEventListener("pointerup", onUp);
+      c.removeEventListener("pointercancel", onUp);
+      // Free GPU resources but keep the context alive: React StrictMode (dev) unmounts and
+      // remounts immediately on the same canvas, and a lost context would render nothing.
+      gl.deleteTexture(tex); gl.deleteBuffer(buf); gl.deleteProgram(prog);
+    };
+  }, []);
+  return <canvas ref={ref} data-cursor="DRAG" className="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing" style={{ touchAction: "pan-y" }} />;
+}
+
 function Magnetic({ children, className = "", ...props }: any) {
   const ref = useRef<HTMLButtonElement>(null);
   const onMove = (e: React.MouseEvent) => {
@@ -392,7 +652,7 @@ export default function App() {
             </h1>
 
             <p className="mt-8 max-w-[54ch] text-[15px] md:text-[17px] leading-[1.75] opacity-60 font-light tracking-[0.01em]">
-              Empowering curiosity and fostering a passion for the cosmos, our astronomy club at Manipal strives to create an inclusive space for students to explore the wonders of the universe. Through stargazing events, educational outreach, and collaborative projects, we aim to inspire a deeper appreciation for astronomy and cultivate a community that celebrates the beauty of the night sky. Join us on a journey of discovery as we explore the mysteries of the cosmos together.
+              Explore the cosmos with the Astronomy Club of Manipal Institute of Technology. From stargazing and astrophotography to space technology and celestial discoveries, we bring curious minds together to look beyond the ordinary.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-3.5">
@@ -401,15 +661,15 @@ export default function App() {
             </div>
 
 
-            <div className="mt-20 grid grid-cols-3 gap-0 max-w-[400px] border-t border-white/10 pt-5">
+            <div className="mt-15 grid grid-cols-3 gap-0 max-w-[600px] border-t border-white/20 pt-5">
               {[
                 { n: 3, s: "K+", l: "STUDENTS REACHED" },
                 { n: 30, s: "+", l: "EVENTS HOSTED" },
                 { n: 2, s: "", l: "TELESCOPES" },
               ].map((x) => (
                 <div key={x.l} className="mono">
-                  <div className="text-[28px] font-semibold tracking-tight flex items-baseline gap-0.5"><CountUp to={x.n} suffix="" /><span className="text-[18px] opacity-70">{x.s}</span></div>
-                  <div className="text-[9px] tracking-[0.2em] opacity-40 mt-1">{x.l}</div>
+                  <div className="text-[38px] font-semibold tracking-tight flex items-baseline gap-0.5"><CountUp to={x.n} suffix="" /><span className="text-[18px] opacity-70">{x.s}</span></div>
+                  <div className="text-[12px] tracking-[0.2em] opacity-40 mt-1">{x.l}</div>
                 </div>
               ))}
             </div>
@@ -421,44 +681,14 @@ export default function App() {
               {/* Grid overlay */}
               <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.5) 1px,transparent 1px)", backgroundSize: "48px 48px" }} />
 
-              {/* Nebula swirl */}
-              <div className="absolute inset-0 opacity-[0.10] bg-[radial-gradient(ellipse_at_40%_40%,rgba(250,204,21,0.35),transparent_40%),radial-gradient(ellipse_at_60%_60%,rgba(245,158,11,0.25),transparent_40%)] animate-[spin_50s_linear_infinite]" />
+              {/* Core glow (also the fallback if WebGL is unavailable) */}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(82,153,255,0.10),transparent_70%)]" />
 
-              {/* Central cosmos */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="relative" style={{ animation: "float 8s ease-in-out infinite" }}>
-                  {/* Core */}
-                  <div className="w-[120px] h-[120px] rounded-full bg-[radial-gradient(circle_at_30%_30%,#fffef0,#fde68a_30%,#ca8a04_70%)] shadow-[0_0_100px_rgba(253,224,71,0.35),0_0_200px_rgba(234,179,8,0.2)] grid place-items-center">
-                    <span className="mono text-[8px] tracking-[0.3em] text-white/70">TACM</span>
-                  </div>
-                  {/* Orbital rings */}
-                  {[
-                    { inset: -25, border: "dashed", opacity: 0.15, speed: "22s" },
-                    { inset: -65, border: "solid", opacity: 0.10, speed: "35s" },
-                    { inset: -115, border: "dashed", opacity: 0.07, speed: "50s" },
-                    { inset: -175, border: "solid", opacity: 0.05, speed: "70s" },
-                  ].map((o, i) => (
-                    <div key={i} className="absolute rounded-full border border-white/30 pointer-events-none" style={{ top: o.inset, left: o.inset, right: o.inset, bottom: o.inset, borderStyle: o.border as any, opacity: o.opacity, animation: `spin ${o.speed} linear infinite` }} />
-                  ))}
-                  {/* Orbiting bodies */}
-                  {[
-                    { r: 65, speed: 12, label: "🌙", size: 5 },
-                    { r: 115, speed: 22, label: "🪐", size: 6 },
-                    { r: 175, speed: 36, label: "🌌", size: 5 },
-                  ].map((o, i) => (
-                    <div key={i} className="absolute left-1/2 top-1/2 w-0 h-0" style={{ animation: `spin ${o.speed}s linear infinite` }}>
-                      <div className="absolute" style={{ transform: `translate(${o.r}px,0)` }}>
-                        <div className="w-0 h-0 relative">
-                          <div className="text-[14px]" style={{ transform: "translate(-50%,-50%)" }}>{o.label}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* 3D Earth (drag to spin) */}
+              <PlanetCanvas />
 
               {/* Constellation lines */}
-              <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 500 500">
+              <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" viewBox="0 0 500 500">
                 <line x1="80" y1="120" x2="150" y2="60" stroke="white" strokeWidth="0.5" />
                 <line x1="150" y1="60" x2="200" y2="110" stroke="white" strokeWidth="0.5" />
                 <line x1="200" y1="110" x2="160" y2="180" stroke="white" strokeWidth="0.5" />
@@ -472,7 +702,7 @@ export default function App() {
               </svg>
 
               {/* Astro specs */}
-              <div className="absolute bottom-0 left-0 right-0 p-5 flex justify-between items-end">
+              <div className="absolute bottom-0 left-0 right-0 p-5 flex justify-between items-end pointer-events-none">
                 <div className="mono text-[9px] leading-[1.6] opacity-40 tracking-[0.1em]">
                   RA 05h 35m · DEC -05° 23' · MAG 4.0<br />
                   FOV 1.2° · EXPO 2.4s · DOBSONIAN 10"
@@ -488,14 +718,14 @@ export default function App() {
             <div className="absolute -left-3 md:-left-6 top-[16%] rotate-[-5deg] w-[200px] p-4 rounded-[18px] bg-white/5 backdrop-blur-xl border border-white/8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]" style={{ animation: "float 7s ease-in-out infinite" }}>
               <div className="mono text-[8px] tracking-[0.25em] opacity-50">NEXT EVENT</div>
               <div className="serif text-[18px] leading-[1.1] mt-1">Star Gazing Night</div>
-              <div className="mono text-[10px] mt-2.5 opacity-50">ENDURANCE · 9PM · FREE</div>
+              <div className="mono text-[10px] mt-2.5 opacity-50">SUNDAY · 7PM · FREE</div>
             </div>
 
             {/* Floating card 2 */}
             <div className="absolute -right-3 md:-right-6 bottom-[20%] rotate-[3deg] w-[200px] p-4 rounded-[18px] bg-white/5 backdrop-blur-xl border border-white/8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]" style={{ animation: "float 9s ease-in-out infinite 1s" }}>
-              <div className="flex items-center gap-2 mono text-[8px] tracking-[0.25em] opacity-50"><span className="w-1 h-1 bg-white rounded-full" /> PODCAST</div>
-              <div className="serif text-[17px] leading-[1.1] mt-1">AstroBytes</div>
-              <div className="mono text-[10px] mt-2.5 opacity-50">SPOTIFY · NEW EPISODE</div>
+              <div className="flex items-center gap-2 mono text-[8px] tracking-[0.25em] opacity-50"><span className="w-1 h-1 bg-white rounded-full" /> VISIT</div>
+              <div className="serif text-[17px] leading-[1.1] mt-1">MCNS Planetarium</div>
+              <div className="mono text-[10px] mt-2.5 opacity-50">Oct 25 · 11:30 AM</div>
             </div>
           </div>
         </div>
@@ -503,10 +733,10 @@ export default function App() {
 
       {/* ABOUT */}
       <section id="about" className="relative z-10 border-t border-white/5">
-        <div className="mx-auto max-w-[1300px] px-6 md:px-10 py-14 md:py-20">
+        <div className="mx-auto max-w-[1300px] px-6 md:px-10 py-14 md:py-10">
           <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-12 items-start">
             <div className="relative">
-              <div className="mono text-[15px] tracking-[0.35em] opacity-40 mb-2 flex items-center gap-3"><span className="w-10 h-px bg-white/20" /> ABOUT</div>
+              <div className="mono text-[15px] tracking-[0.35em] text-[var(--gold)] flex items-center gap-3"><span className="w-10 h-px bg-[var(--gold)] opacity-60" /> ABOUT</div>
               <h2 className="serif text-[44px] md:text-[70px] leading-[0.92] tracking-[-0.02em] mt-6">
                 We look up<br />
                 <span className="italic opacity-50 text-[#c4b5fd]">to feel small</span>
@@ -568,15 +798,6 @@ export default function App() {
         </div>
       </section>
 
-
-      {/* PHOTO BAND */}
-      <section className="relative z-10 h-[46vh] min-h-[320px] overflow-hidden border-y border-white/5">
-        <img src="/images/gallery/Nebula/EagleNebula.png" alt="Eagle Nebula" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-[#03050c]/40" />
-        <div className="relative h-full mx-auto max-w-[1300px] px-6 md:px-10 flex items-end pb-8">
-          <div className="mono text-[11px] tracking-[0.2em] text-white/80">EAGLE NEBULA · PHOTOGRAPHED FROM MANIPAL</div>
-        </div>
-      </section>
 
 
       {/* PROJECTS */}
@@ -782,7 +1003,7 @@ export default function App() {
               <div className="mt-16 grid md:grid-cols-3 gap-5 mono text-[13px] leading-[1.6]">
                 {[
                   { title: "ADDRESS", content: ["Manipal Institute of Technology,", "Eshwar Nagar, Manipal,", "Karnataka 576104, India"] },
-                  { title: "HOURS", content: ["Mon-Fri 5pm - 8pm", "Sky: Fri & Sat 9pm+", "Planetarium: Sundays"] },
+                  { title: "HOURS", content: ["Stargazing: Fri & Sat 7pm+", "Planetarium: Sundays"] },
                   { title: "COORDINATES", content: ["13.3525° N, 74.7925° E", "Elev: 73m ASL", "Bortle: 5 - Suburban sky"] },
                 ].map((sec) => (
                   <div key={sec.title} className="bg-white/[0.02] rounded-[16px] p-5 border border-white/5">
