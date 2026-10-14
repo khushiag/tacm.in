@@ -1,0 +1,101 @@
+[
+  {
+    "cat": "Galaxy",
+    "title": "Andromeda",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Galaxy/Andromeda.jpg",
+    "thumb": "/images/gallery-thumbs/Galaxy/Andromeda.webp",
+    "id": 1,
+    "content": "Siddharth.S \nTaken through Celestron RASA \nExposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
+
+  },
+  {
+    "cat": "Galaxy",
+    "title": "CigarGalaxy",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Galaxy/CigarGalaxy.jpg",
+    "thumb": "/images/gallery-thumbs/Galaxy/CigarGalaxy.webp",
+    "id": 2,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
+  },
+  {
+    "cat": "Galaxy",
+    "title": "Leotrio",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Galaxy/Leotrio.jpg",
+    "thumb": "/images/gallery-thumbs/Galaxy/Leotrio.webp",
+    "id": 3
+  },
+  {
+    "cat": "Moon",
+    "title": "Moon",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Moon/Moon.png",
+    "thumb": "/images/gallery-thumbs/Moon/Moon.webp",
+    "id": 4
+  },
+  {
+    "cat": "Nebula",
+    "title": "ButterflyNebula",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Nebula/ButterflyNebula.jpg",
+    "thumb": "/images/gallery-thumbs/Nebula/ButterflyNebula.webp",
+    "id": 5
+  },
+  {
+    "cat": "Nebula",
+    "title": "EagleNebula",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Nebula/EagleNebula.png",
+    "thumb": "/images/gallery-thumbs/Nebula/EagleNebula.webp",
+    "id": 6
+  },
+  {
+    "cat": "Nebula",
+    "title": "helix",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Nebula/helix.jpg",
+    "thumb": "/images/gallery-thumbs/Nebula/helix.webp",
+    "id": 7
+  },
+  {
+    "cat": "Nebula",
+    "title": "Orion",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Nebula/Orion.png",
+    "thumb": "/images/gallery-thumbs/Nebula/Orion.webp",
+    "id": 8
+  },
+  {
+    "cat": "Nebula",
+    "title": "Rosette",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Nebula/Rosette.png",
+    "thumb": "/images/gallery-thumbs/Nebula/Rosette.webp",
+    "id": 9
+  },
+  {
+    "cat": "Night Sky",
+    "title": "Railwaybridge",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Night%20Sky/Railwaybridge.jpg",
+    "thumb": "/images/gallery-thumbs/Night%20Sky/Railwaybridge.webp",
+    "id": 10
+  },
+  {
+    "cat": "Planet",
+    "title": "Saturn",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Planet/Saturn.png",
+    "thumb": "/images/gallery-thumbs/Planet/Saturn.webp",
+    "id": 11
+  },
+  {
+    "cat": "Star Cluster",
+    "title": "SatelliteCluster",
+    "date": "Oct 13, 2026",
+    "src": "/images/gallery/Star%20Cluster/SatelliteCluster.jpg",
+    "thumb": "/images/gallery-thumbs/Star%20Cluster/SatelliteCluster.webp",
+    "id": 12
+  }
+]
