@@ -49,20 +49,20 @@ const Icons = {
 };
 
 const team = [
-  { name: "Khushi Agarwal", role: "President", img: "/images/board pictures/Khushi.jpeg", linkedin: "https://www.linkedin.com/in/khushiagarwl" },
-  { name: "Prisha Kumra", role: "Vice President", img: "/images/board pictures/Prisha.jpg", linkedin: "https://www.linkedin.com/in/prisha-kumra-8692b7311/" },
-  { name: "Pranav Bijurkar", role: "Treasurer", img: "/images/board pictures/Pranav.png", linkedin: "https://www.linkedin.com/in/pranav-bijurkar-0b2389342/" },
-  { name: "Amrutha M", role: "General Secretary", img: "/images/board pictures/Amrutha.jpg", linkedin: "https://www.linkedin.com/in/amrutha-m-1730433a8/" },
-  { name: "Sahasra Badam Sai", role: "Head of HR", img: "/images/board pictures/Sahasra.jpg", linkedin: "https://www.linkedin.com/in/sai-sahasra-badam-75042131b/" },
+  { name: "Khushi Agarwal", role: "President", cursor:"Prez", img: "/images/board pictures/Khushi.jpeg", linkedin: "https://www.linkedin.com/in/khushiagarwl" },
+  { name: "Prisha Kumra", role: "Vice President", cursor:"Vice\nPrez", img: "/images/board pictures/Prisha.jpeg", linkedin: "https://www.linkedin.com/in/prisha-kumra-8692b7311/" },
+  { name: "Pranav Bijurkar", role: "Treasurer", cursor:"Treasurer", img: "/images/board pictures/Pranav.png", linkedin: "https://www.linkedin.com/in/pranav-bijurkar-0b2389342/" },
+  { name: "Amrutha M", role: "General Secretary", cursor:"GenSec", img: "/images/board pictures/Amrutha.jpg", linkedin: "https://www.linkedin.com/in/amrutha-m-1730433a8/" },
+  { name: "Sahasra", role: "Head of HR", cursor:"HR\nHead", img: "/images/board pictures/Sahasra.jpeg", linkedin: "https://www.linkedin.com/in/sai-sahasra-badam-75042131b/" },
 
-  { name: "Anmol Kesarwani", role: "Technical Head – Applied Projects", img: "/images/board pictures/Anmol.jpg", linkedin: "https://www.linkedin.com/in/anmol-kesarwani/" },
-  { name: "Siddharth Sudheer", role: "Technical Head – Research", img: "/images/board pictures/Pari.jpg", linkedin: "https://www.linkedin.com/in/siddharth-sudheer-9b2552322/" },
-  { name: "Trishanth Bharath", role: "Astrophotography", img: "/images/board pictures/Trishanth.jpg", linkedin: "https://www.linkedin.com/in/trishanth-bharath-82439b328/" },
-  { name: "Brunda S M", role: "SM & Content", img: "/images/board pictures/Brunda.jpg", linkedin: "https://www.linkedin.com/in/brunda-s-m-ab1082381/" },
-  { name: "Prisha Kumra", role: "SM & Content", img: "/images/board pictures/Prisha.jpg", linkedin: "https://www.linkedin.com/in/prisha-kumra-8692b7311/" },
-  { name: "Krtin Vishnu Vardhan", role: "Graphic Design", img: "/images/board pictures/Krtin.jpeg", linkedin: "https://www.linkedin.com/in/krtinv/" },
-  { name: "Devanshi Thakur", role: "Graphic Design", img: "/images/board pictures/Devanshi.jpg", linkedin: "https://www.linkedin.com/in/devanshi-thakur-22jan06/" },
-  { name: "Siddharth Sudeep Edakkattu", role: "Podcast Head", img: "/images/board pictures/Batak.jpg", linkedin: "https://www.linkedin.com/in/siddharth-sudeep-a6a794352/" },
+  { name: "Anmol Kesarwani", role: "Technical Head – Applied Projects", cursor:"Tech\nHead", img: "/images/board pictures/Anmol.jpg", linkedin: "https://www.linkedin.com/in/anmol-kesarwani/" },
+  { name: "Siddharth Sudheer", role: "Technical Head – Research", cursor:"Tech\nHead", img: "/images/board pictures/Pari.jpeg", linkedin: "https://www.linkedin.com/in/siddharth-sudheer-9b2552322/" },
+  { name: "Trishanth Bharath", role: "Astrophotography", cursor:"Astroph", img: "/images/board pictures/Trishanth.jpg", linkedin: "https://www.linkedin.com/in/trishanth-bharath-82439b328/" },
+  { name: "Brunda S M", role: "SM & Content", cursor:"SMC\nHead", img: "/images/board pictures/Brunda.jpeg", linkedin: "https://www.linkedin.com/in/brunda-s-m-ab1082381/" },
+  { name: "Prisha Kumra", role: "SM & Content", cursor:"SMC\nHead", img: "/images/board pictures/Prisha.jpeg", linkedin: "https://www.linkedin.com/in/prisha-kumra-8692b7311/" },
+  { name: "Krtin Vishnu Vardhan", role: "Graphic Design", cursor:"GD\nHead", img: "/images/board pictures/Krtin.jpeg", linkedin: "https://www.linkedin.com/in/krtinv/" },
+  { name: "Devanshi Thakur", role: "Graphic Design", cursor:"GD\nHead", img: "/images/board pictures/Devanshi.jpg", linkedin: "https://www.linkedin.com/in/devanshi-thakur-22jan06/" },
+  { name: "Siddharth Sudeep Edakkattu", role: "Podcast Head", cursor:"Podcast\nHead", img: "/images/board pictures/Batak.jpg", linkedin: "https://www.linkedin.com/in/siddharth-sudeep-a6a794352/" },
 ];
 
 const eventsData = [
@@ -152,11 +152,12 @@ function CustomCursor() {
 >
   <span
     style={{
-      fontSize: `${Math.max(5, 90 / txt.length)}px`,
+      fontSize: txt === "ZOOM" ? "12px" : `${Math.max(5, 90 / Math.max(...txt.split("\n").map((l) => l.length)))}px`,
       lineHeight: 1.05,
       letterSpacing: "0.08em",
       maxWidth: "74px",
       wordBreak: "break-word",
+      whiteSpace: "pre-line",
     }}
     className="font-mono uppercase text-white"
   >
@@ -174,7 +175,7 @@ function StarField() {
     const ctx = c.getContext("2d")!;
     let w = c.width = innerWidth;
     let h = c.height = innerHeight;
-    const stars = Array.from({ length: 360 }, () => ({
+    const stars = Array.from({ length: innerWidth < 768 ? 160 : 360 }, () => ({ // fewer on phones
       x: Math.random() * w,
       y: Math.random() * h,
       r: Math.random() * 1.4 + 0.2,
@@ -531,6 +532,14 @@ export default function App() {
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [scroll, setScroll] = useState(0);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [menuOpen, setMenuOpen] = useState(false); // phone menu
+  const touchX = useRef<number | null>(null);      // lightbox swipe
+
+  // lock page scroll while the phone menu is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
 
   useEffect(() => {
     const onScroll = () => setScroll(scrollY / (document.body.scrollHeight - innerHeight));
@@ -580,16 +589,16 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen bg-[#03050c] text-[#eaeef6] selection:bg-white selection:text-black antialised overflow-clip">
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;600;800&family=Geist+Mono:wght@300;400;500&display=swap');*{font-family:"Syne",system-ui}.serif{font-family:"Instrument Serif",serif}.mono{font-family:"Geist Mono",monospace}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#ffffff33;border-radius:3px}html{scroll-behavior:smooth}:root{--gold:#f0b94a}${keyframes}`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;600;800&family=Geist+Mono:wght@300;400;500&display=swap');*{font-family:"Syne",system-ui}.serif{font-family:"Instrument Serif",serif}.mono{font-family:"Geist Mono",monospace}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#ffffff33;border-radius:3px}html{scroll-behavior:smooth}:root{--gold:#f0b94a}.swipe-row{scrollbar-width:none}.swipe-row::-webkit-scrollbar{display:none}${keyframes}`}</style>
 
       <CustomCursor />
       <StarField />
 
       {/* Ambient glow */}
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute top-[-20%] left-[5%] w-[60vw] h-[60vw] rounded-full bg-[radial-gradient(circle,rgba(120,119,198,0.18),transparent_65%)] blur-[40px]" />
-        <div className="absolute top-[30%] right-[-15%] w-[50vw] h-[50vw] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.12),transparent_65%)] blur-[40px]" />
-        <div className="absolute bottom-[-10%] left-[20%] w-[70vw] h-[50vh] bg-[radial-gradient(ellipse,rgba(56,189,248,0.10),transparent_60%)] blur-[30px]" />
+        <div className="absolute top-[-20%] left-[5%] w-[60vw] h-[60vw] rounded-full bg-[radial-gradient(circle,rgba(120,119,198,0.18),transparent_65%)] md:blur-[40px]" />
+        <div className="absolute top-[30%] right-[-15%] w-[50vw] h-[50vw] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.12),transparent_65%)] md:blur-[40px]" />
+        <div className="absolute bottom-[-10%] left-[20%] w-[70vw] h-[50vh] bg-[radial-gradient(ellipse,rgba(56,189,248,0.10),transparent_60%)] md:blur-[30px]" />
       </div>
 
       {/* Scroll progress bar */}
@@ -605,7 +614,7 @@ export default function App() {
   className="w-8 h-8 rounded-full object-cover"
 />
             <div className="leading-[1.05]">
-              <div className="mono text-[15px] tracking-[0.2em] opacity-80 group-hover:opacity-100 transition">THE ASTRONOMY CLUB</div>
+              <div className="mono text-[13px] sm:text-[15px] tracking-[0.2em] opacity-80 group-hover:opacity-100 transition">THE ASTRONOMY CLUB</div>
               <div className="mono text-[10px] tracking-[0.3em] opacity-40 mt-1.5">MANIPAL - MIT</div>
             </div>
           </a>
@@ -629,12 +638,53 @@ export default function App() {
                 </a>
               ))}
             </div>
+
+            {/* Phone menu button */}
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              className="md:hidden w-11 h-11 -mr-1 rounded-full border border-white/10 bg-white/[0.04] grid place-items-center"
+            >
+              <span className="relative block w-[18px] h-[10px]">
+                <span className={`absolute left-0 right-0 h-px bg-white transition-all duration-300 ${menuOpen ? "top-[5px] rotate-45" : "top-0"}`} />
+                <span className={`absolute left-0 right-0 h-px bg-white transition-all duration-300 ${menuOpen ? "top-[5px] -rotate-45" : "top-[10px]"}`} />
+              </span>
+            </button>
         </div>
       </nav>
 
+      {/* PHONE MENU */}
+      <div className={`md:hidden fixed inset-0 top-[66px] z-40 bg-[#03050c]/95 backdrop-blur-xl transition-opacity duration-300 ${menuOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+        <div className="h-full flex flex-col justify-between px-6 pt-8 pb-10 overflow-y-auto">
+          <div className="flex flex-col">
+            {["#about","#events","#projects","#gallery","#team","#contact"].map((href, i) => (
+              <a
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-baseline gap-4 py-3 border-b border-white/5 transition-all duration-500 ${menuOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
+                style={{ transitionDelay: menuOpen ? `${80 + i * 50}ms` : "0ms" }}
+              >
+                <span className="mono text-[11px] opacity-40">0{i + 1}</span>
+                <span className="serif text-[38px] leading-none">{["About","Events","Projects","Gallery","Team","Contact"][i]}</span>
+              </a>
+            ))}
+          </div>
+          <div className="flex gap-3 pt-8">
+            {topLinks.map((s) => (
+              <a key={s.k} href={s.href} target="_blank" rel="noreferrer" aria-label={s.label}
+                className="w-12 h-12 rounded-full border border-white/10 bg-white/[0.04] grid place-items-center">
+                {Icons[s.k as keyof typeof Icons]({ className: "w-5 h-5" })}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* HERO */}
       <section className="relative z-10 pt-[66px] overflow-hidden">
-        <div className="mx-auto max-w-[1300px] px-6 md:px-10 py-[10vh] md:py-[14vh] grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-start">
+        <div className="mx-auto max-w-[1300px] px-6 md:px-10 pt-[10vh] md:pt-[14vh] pb-[4vh] md:pb-[5vh] grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-start">
           <div className="relative">
             {/* <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/8 bg-white/[0.03] mono text-[10px] tracking-[0.15em] backdrop-blur" style={{ animation: "breathe 4s ease-in-out infinite" }}>
               <span className="w-[6px] h-[6px] rounded-full bg-emerald-400 animate-pulse" />
@@ -642,14 +692,19 @@ export default function App() {
               <span className="opacity-40 hidden sm:inline">· STARGAZING EVERY FRIDAY</span>
             </div> */}
 
-            <h1 className="mt-0 text-[14vw] md:text-[10vw] lg:text-[9.2vw] leading-[0.82] tracking-[-0.05em] font-[800]">
+            <h1 className="mt-0 text-[14vw] md:text-[10vw] lg:text-[9.2vw] leading-[0.86] tracking-[-0.05em] font-[800]">
               <span className="block opacity-90">THE</span>
-              <span className="block serif italic font-[400] tracking-[-0.03em] text-transparent bg-clip-text bg-gradient-to-r from-[#fff] via-[#e0d0ff] to-[#a78bfa]">Astronomy</span>
+              <span className="block serif italic font-[400] tracking-[-0.03em] text-transparent bg-clip-text bg-gradient-to-r from-[#fff] via-[#e0d0ff] to-[#a78bfa] pb-[0.12em]">
+                Astronomy
+              </span>
               <span className="block flex items-start md:items-center gap-3 md:gap-5 flex-wrap">
                 CLUB
-                <span className="mono text-[12px] md:text-[14px] leading-none tracking-[0.15em] font-normal border border-white/12 rounded-full px-5 py-2.5 bg-white/[0.03] backdrop-blur">MANIPAL</span>
+                <span className="mono text-[12px] md:text-[14px] leading-none tracking-[0.15em] font-normal border border-white/12 rounded-full px-5 py-2.5 bg-white/[0.03] backdrop-blur">
+                  MANIPAL
+                </span>
               </span>
             </h1>
+
 
             <p className="mt-8 max-w-[54ch] text-[15px] md:text-[17px] leading-[1.75] opacity-60 font-light tracking-[0.01em]">
               Explore the cosmos with the Astronomy Club of Manipal Institute of Technology. From stargazing and astrophotography to space technology and celestial discoveries, we bring curious minds together to look beyond the ordinary.
@@ -661,22 +716,22 @@ export default function App() {
             </div>
 
 
-            <div className="mt-15 grid grid-cols-3 gap-0 max-w-[600px] border-t border-white/20 pt-5">
+            <div className="mt-15 grid grid-cols-3 gap-0 max-w-[600px] border-t border-white/20 pt-3">
               {[
                 { n: 3, s: "K+", l: "STUDENTS REACHED" },
                 { n: 30, s: "+", l: "EVENTS HOSTED" },
                 { n: 2, s: "", l: "TELESCOPES" },
               ].map((x) => (
                 <div key={x.l} className="mono">
-                  <div className="text-[38px] font-semibold tracking-tight flex items-baseline gap-0.5"><CountUp to={x.n} suffix="" /><span className="text-[18px] opacity-70">{x.s}</span></div>
-                  <div className="text-[12px] tracking-[0.2em] opacity-40 mt-1">{x.l}</div>
+                  <div className="text-[30px] md:text-[38px] font-semibold tracking-tight flex items-baseline gap-0.5"><CountUp to={x.n} suffix="" /><span className="text-[18px] opacity-70">{x.s}</span></div>
+                  <div className="text-[11px] md:text-[12px] tracking-[0.15em] md:tracking-[0.2em] opacity-40 mt-1">{x.l}</div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Right side  refined deep-space visual */}
-          <div className="relative lg:h-[78vh] min-h-[460px]">
+          <div className="relative lg:h-[78vh] min-h-[380px] sm:min-h-[460px]">
             <div className="absolute inset-0 rounded-[32px] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.04),transparent_70%)] backdrop-blur-[1px] overflow-hidden border border-white/6">
               {/* Grid overlay */}
               <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.5) 1px,transparent 1px)", backgroundSize: "48px 48px" }} />
@@ -703,11 +758,11 @@ export default function App() {
 
               {/* Astro specs */}
               <div className="absolute bottom-0 left-0 right-0 p-5 flex justify-between items-end pointer-events-none">
-                <div className="mono text-[9px] leading-[1.6] opacity-40 tracking-[0.1em]">
+                <div className="hidden sm:block mono text-[9px] leading-[1.6] opacity-40 tracking-[0.1em]">
                   RA 05h 35m · DEC -05° 23' · MAG 4.0<br />
                   FOV 1.2° · EXPO 2.4s · DOBSONIAN 10"
                 </div>
-                <div className="flex items-center gap-2.5 mono text-[9px] tracking-[0.2em] opacity-40">
+                <div className="ml-auto flex items-center gap-2.5 mono text-[10px] sm:text-[9px] tracking-[0.2em] opacity-40 whitespace-nowrap">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   TRACKING LIVE
                 </div>
@@ -715,24 +770,38 @@ export default function App() {
             </div>
 
             {/* Floating card 1 */}
-            <div className="absolute -left-3 md:-left-6 top-[16%] rotate-[-5deg] w-[200px] p-4 rounded-[18px] bg-white/5 backdrop-blur-xl border border-white/8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]" style={{ animation: "float 7s ease-in-out infinite" }}>
+            <div className="hidden sm:block absolute -left-3 md:-left-6 top-[16%] rotate-[-5deg] w-[200px] p-4 rounded-[18px] bg-white/5 backdrop-blur-xl border border-white/8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]" style={{ animation: "float 7s ease-in-out infinite" }}>
               <div className="mono text-[8px] tracking-[0.25em] opacity-50">NEXT EVENT</div>
               <div className="serif text-[18px] leading-[1.1] mt-1">Star Gazing Night</div>
               <div className="mono text-[10px] mt-2.5 opacity-50">SUNDAY · 7PM · FREE</div>
             </div>
 
             {/* Floating card 2 */}
-            <div className="absolute -right-3 md:-right-6 bottom-[20%] rotate-[3deg] w-[200px] p-4 rounded-[18px] bg-white/5 backdrop-blur-xl border border-white/8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]" style={{ animation: "float 9s ease-in-out infinite 1s" }}>
+            <div className="hidden sm:block absolute -right-3 md:-right-6 bottom-[20%] rotate-[3deg] w-[200px] p-4 rounded-[18px] bg-white/5 backdrop-blur-xl border border-white/8 shadow-[0_20px_60px_rgba(0,0,0,0.5)]" style={{ animation: "float 9s ease-in-out infinite 1s" }}>
               <div className="flex items-center gap-2 mono text-[8px] tracking-[0.25em] opacity-50"><span className="w-1 h-1 bg-white rounded-full" /> VISIT</div>
               <div className="serif text-[17px] leading-[1.1] mt-1">MCNS Planetarium</div>
               <div className="mono text-[10px] mt-2.5 opacity-50">Oct 25 · 11:30 AM</div>
+            </div>
+          </div>
+
+          {/* Phones: the two floating cards sit neatly under the Earth instead of covering it */}
+          <div className="sm:hidden -mt-6 grid grid-cols-2 gap-3">
+            <div className="p-4 rounded-[18px] bg-white/5 border border-white/8">
+              <div className="mono text-[10px] tracking-[0.2em] opacity-50">NEXT EVENT</div>
+              <div className="serif text-[18px] leading-[1.1] mt-1">Star Gazing Night</div>
+              <div className="mono text-[11px] mt-2 opacity-50">SUNDAY · 7PM · FREE</div>
+            </div>
+            <div className="p-4 rounded-[18px] bg-white/5 border border-white/8">
+              <div className="mono text-[10px] tracking-[0.2em] opacity-50">VISIT</div>
+              <div className="serif text-[18px] leading-[1.1] mt-1">MCNS Planetarium</div>
+              <div className="mono text-[11px] mt-2 opacity-50">Oct 25 · 11:30 AM</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ABOUT */}
-      <section id="about" className="relative z-10 border-t border-white/5">
+      <section id="about" className="scroll-mt-[66px] relative z-10 border-t border-white/15">
         <div className="mx-auto max-w-[1300px] px-6 md:px-10 py-14 md:py-10">
           <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-12 items-start">
             <div className="relative">
@@ -758,9 +827,9 @@ export default function App() {
               ["40Q", "Quintillion black holes"],
               ["200S", "Sextillion stars counting"],
             ].map(([n, l]) => (
-              <div key={n} className="flex items-center gap-3 px-5 py-5 md:py-7">
+              <div key={n} className="flex items-center gap-3 px-3 md:px-5 py-5 md:py-7">
                 <div className="text-[22px] md:text-[30px] font-bold tracking-tight text-[#c4b5fd]">{n}</div>
-                <div className="mono text-[9px] leading-[1.2] tracking-[0.15em] opacity-40 uppercase">{l}</div>
+                <div className="mono text-[10px] md:text-[9px] leading-[1.2] tracking-[0.1em] md:tracking-[0.15em] opacity-50 md:opacity-40 uppercase">{l}</div>
               </div>
             ))}
           </div>
@@ -768,7 +837,7 @@ export default function App() {
       </section>
 
       {/* EVENTS */}
-      <section id="events" className="relative z-10 py-14 md:py-20 overflow-hidden">
+      <section id="events" className="scroll-mt-[66px] relative z-10 py-14 md:py-20 overflow-hidden">
         <div className="mx-auto max-w-[1300px] px-6 md:px-10">
           <div className="flex flex-wrap justify-between items-end gap-6">
             <div>
@@ -776,16 +845,16 @@ export default function App() {
               
               <h3 className="serif text-[48px] md:text-[74px] leading-[0.88] mt-4">Cosmic blend<br />of knowledge & thrill</h3>
             </div>
-            <p className="mono text-[10px] tracking-[0.2em] max-w-[28ch] opacity-40">FROM STARGAZING NIGHTS TO CELESTIAL WORKSHOPS AND COMPETITIONS</p>
+            <p className="mono text-[11px] md:text-[10px] tracking-[0.2em] max-w-[28ch] opacity-40">FROM STARGAZING NIGHTS TO CELESTIAL WORKSHOPS AND COMPETITIONS</p>
           </div>
 
-          <div className="mt-14 grid md:grid-cols-3 gap-5">
+          <div className="swipe-row mt-10 md:mt-14 -mx-6 px-6 md:mx-0 md:px-0 flex md:grid md:grid-cols-3 gap-4 md:gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory">
             {eventsData.map((ev) => (
-              <div key={ev.k} data-cursor={ev.cursor} className="group relative rounded-[24px] overflow-hidden border border-white/8 bg-[#0b0e1a] hover:border-white/20 transition duration-500 hover:shadow-[0_0_40px_rgba(168,85,247,0.06)]">
-                <div className="h-[280px] overflow-hidden relative">
+              <div key={ev.k} data-cursor={ev.cursor} className="shrink-0 w-[82%] sm:w-[60%] md:w-auto snap-start group relative rounded-[24px] overflow-hidden border border-white/8 bg-[#0b0e1a] hover:border-white/20 transition duration-500 hover:shadow-[0_0_40px_rgba(168,85,247,0.06)]">
+                <div className="h-[200px] md:h-[280px] overflow-hidden relative">
                   <img src={ev.img} className="w-full h-full object-cover group-hover:scale-[1.08] transition duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0b0e1a] via-[#0b0e1a]/20 to-transparent" />
-                  <div className="absolute top-4 left-4 mono text-[9px] tracking-[0.2em] px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/10">{ev.tag}</div>
+                  <div className="absolute top-4 left-4 mono text-[10px] md:text-[9px] tracking-[0.2em] px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/10">{ev.tag}</div>
                   <div className="absolute top-4 right-4 mono text-[9px] w-8 h-8 grid place-items-center rounded-full bg-black/30 backdrop-blur border border-white/10">{ev.k}</div>
                 </div>
                 <div className="p-6">
@@ -801,22 +870,22 @@ export default function App() {
 
 
       {/* PROJECTS */}
-      <section id="projects" className="relative z-10 py-14 md:py-20 bg-[#080a15] border-y border-white/5">
+      <section id="projects" className="scroll-mt-[66px] relative z-10 py-14 md:py-20 bg-[#080a15] border-y border-white/5">
         <div className="mx-auto max-w-[1300px] px-6 md:px-10">
           <div className="mono text-[15px] tracking-[0.35em] text-[var(--gold)] flex items-center gap-3"><span className="w-10 h-px bg-[var(--gold)] opacity-60" /> PROJECTS</div>
-          <div className="mt-10 grid md:grid-cols-3 gap-5">
+          <div className="swipe-row mt-10 -mx-6 px-6 md:mx-0 md:px-0 flex md:grid md:grid-cols-3 gap-4 md:gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory">
             {[
               { title: "Research & Paper Review", cursor:"PAPERS", desc: "Unparalleled opportunities for scholarly research, paper reviews, and in-depth celestial exploration of LIGO, gravitational waves, exoplanets.", icon: "◐", cta: "READ PAPERS" },
               { title: "Telescope Mount Build", cursor:"MOUNT", desc: "Selecting sturdy materials to assembling components, each step contributes to the stability and performance of a custom equatorial mount.", icon: "◑", cta: "BUILD LOG" },
               { title: "Star Tracking API", cursor:"API", desc: "Designing a user-friendly interface integrating with star databases and ensuring accurate celestial positioning information.", icon: "◎", cta: "API DOCS" },
             ].map((p, i) => (
-              <div key={i} data-cursor={p.cursor} className="relative group rounded-[20px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.01))] p-[1px] hover:border-white/20 transition">
+              <div key={i} data-cursor={p.cursor} className="shrink-0 w-[82%] sm:w-[60%] md:w-auto snap-start relative group rounded-[20px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.01))] p-[1px] hover:border-white/20 transition">
                 <div className="rounded-[19px] bg-[#0e1224] p-6 md:p-7 h-full">
                   <div className="w-10 h-10 rounded-full border border-white/10 grid place-items-center text-[18px] bg-white/[0.04]">{p.icon}</div>
                   <h4 className="mt-6 text-[21px] leading-[1.1] font-semibold">{p.title}</h4>
                   <p className="mt-3 mono text-[12px] leading-[1.7] opacity-55">{p.desc}</p>
                   <div className="mt-8 flex items-center justify-between">
-                    <span className="mono text-[9px] tracking-[0.2em] px-3 py-1.5 rounded-full bg-white/8 border border-white/10">{p.cta}</span>
+                    <span className="mono text-[10px] md:text-[9px] tracking-[0.2em] px-3 py-1.5 rounded-full bg-white/8 border border-white/10">{p.cta}</span>
                     <span className="w-8 h-8 rounded-full bg-white/10 text-white grid place-items-center group-hover:bg-white group-hover:text-black transition group-hover:rotate-[-45deg] duration-500">↗</span>
                   </div>
                 </div>
@@ -826,26 +895,26 @@ export default function App() {
 
           <div className="mt-14 rounded-[24px] border border-white/8 bg-gradient-to-br from-[#0e1224] to-[#0b0e1a] p-7 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <div className="serif text-[24px] md:text-[32px] leading-[1.05] max-w-[26ch] text-[#c4b5fd] italic">"Astronomy is a humbling reminder that in the vast expanse of the cosmos, our existence is but a fleeting moment, yet our curiosity knows no bounds."</div>
-            <div className="mono text-[10px] tracking-[0.2em] opacity-40 shrink-0"> TACM MANIFESTO</div>
+            <div className="mono text-[11px] md:text-[10px] tracking-[0.2em] opacity-40 shrink-0"> TACM MANIFESTO</div>
           </div>
         </div>
       </section>
 
       {/* GALLERY */}
-      <section id="gallery" className="relative z-10 py-14 md:py-20">
+      <section id="gallery" className="scroll-mt-[66px] relative z-10 py-14 md:py-20">
         <div className="mx-auto max-w-[1300px] px-6 md:px-10">
           <div className="flex flex-wrap gap-6 items-end justify-between">
             <div>
               <div className="mono text-[15px] tracking-[0.35em] text-[var(--gold)] flex items-center gap-3"><span className="w-10 h-px bg-[var(--gold)] opacity-60" /> GALLERY</div>
               <h3 className="serif text-[52px] md:text-[84px] leading-[0.85] mt-4">In stillness,<br />the sky moves</h3>
             </div>
-            <div className="flex gap-2 mono text-[10px] tracking-[0.15em] flex-wrap">
+            <div className="flex gap-2 mono text-[11px] md:text-[10px] tracking-[0.15em] flex-wrap">
               {categories.map((c: string) => (
                 <button
                   key={c}
                   onClick={() => { setFilter(c); setVisible(PAGE); }}
                   data-cursor="FILTER"
-                  className={`px-4 h-8 rounded-full border transition ${filter === c ? "bg-[var(--gold)] text-black border-[var(--gold)]" : "border-white/10 bg-white/[0.03] hover:bg-white/10"}`}
+                  className={`px-4 h-10 md:h-8 rounded-full border transition ${filter === c ? "bg-[var(--gold)] text-black border-[var(--gold)]" : "border-white/10 bg-white/[0.03] hover:bg-white/10"}`}
                 >
                   {c.toUpperCase()}
                 </button>
@@ -858,7 +927,7 @@ export default function App() {
               NO PHOTOS YET. ADD IMAGES TO public/images/gallery AND RUN npm run gallery
             </div>
           ) : (
-            <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {shown.map((g: any, i: number) => (
                 <div
                   key={g.id}
@@ -912,20 +981,17 @@ export default function App() {
         <div className="mx-auto max-w-[1300px] px-6 md:px-10">
           <div className="flex justify-between items-end">
             <div className="mono text-[15px] tracking-[0.35em] text-[var(--gold)] flex items-center gap-3"><span className="w-10 h-px bg-[var(--gold)] opacity-60" /> MEET THE TEAM</div>
-            <div className="mono text-[15px] tracking-[0.2em] opacity-30">2026 · 27 BOARD</div>
+            <div className="mono text-[11px] md:text-[15px] tracking-[0.2em] opacity-30">2026 · 27 BOARD</div>
           </div>
-          <div className="mt-12 flex flex-wrap justify-center gap-4">
-        
-
-        <div className="mt-12 flex flex-wrap justify-center gap-4">
+        <div className="mt-10 md:mt-12 grid grid-cols-2 gap-x-3 gap-y-6 sm:flex sm:flex-wrap sm:justify-center sm:gap-4">
           {team.map((m) => {
             const Card: any = m.linkedin ? "a" : "div";
             return (
               <Card
                 key={`${m.name}-${m.role}`}
                 {...(m.linkedin ? { href: m.linkedin, target: "_blank", rel: "noreferrer" } : {})}
-                data-cursor={m.role.toUpperCase()}
-                className="group block w-[230px] flex-shrink-0"
+                data-cursor={(m.cursor || m.role).toUpperCase()}
+                className="group block w-full sm:w-[230px] flex-shrink-0"
               >
                 <div className="aspect-[4/5] rounded-[18px] overflow-hidden border border-white/8 bg-[#0b0e1a] relative">
                   <img
@@ -938,12 +1004,12 @@ export default function App() {
                       {Icons.linkedin({ className: "w-4 h-4" })}
                     </div>
                   )}
-                  <div className="absolute bottom-3 left-3 right-3 mono text-[10px] tracking-[0.15em] px-3 py-2 rounded-full bg-white/90 text-black text-center">
+                  <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 mono text-[9px] sm:text-[10px] leading-[1.25] tracking-[0.1em] sm:tracking-[0.15em] px-2 sm:px-3 py-1.5 sm:py-2 rounded-[12px] sm:rounded-full bg-white/90 text-black text-center">
                     {m.role.toUpperCase()}
                   </div>
                 </div>
 
-                <div className="mt-4 mono text-[15px] leading-[1.2] text-center">
+                <div className="mt-3 sm:mt-4 mono text-[14px] sm:text-[15px] leading-[1.2] text-center">
                   {m.name.split(" ")[0]}
                   <br />
                   <span className="opacity-40 text-[12px]">{m.name.split(" ").slice(1).join(" ")}</span>
@@ -952,10 +1018,6 @@ export default function App() {
             );
           })}
         </div>
-
-
-
-</div>
         </div>
       </section>
 
@@ -965,7 +1027,7 @@ export default function App() {
           <div className="md:sticky md:top-[30vh] self-start">
             <div className="mono text-[15px] tracking-[0.35em] text-[var(--gold)] flex items-center gap-3"><span className="w-10 h-px bg-[var(--gold)] opacity-60" /> FAQ</div>
             <h3 className="serif text-[42px] leading-[0.92] mt-6">Answers for<br />star-struck minds</h3>
-            <div className="mt-8 w-fit px-4 py-2.5 rounded-full border border-white/8 mono text-[9px] tracking-[0.15em] bg-white/[0.03] backdrop-blur">RECRUITMENTS · OPEN TO ALL MAHE</div>
+            <div className="mt-8 w-fit px-4 py-2.5 rounded-full border border-white/8 mono text-[10px] md:text-[9px] tracking-[0.15em] bg-white/[0.03] backdrop-blur">RECRUITMENTS · OPEN TO ALL MAHE</div>
           </div>
           <div className="divide-y divide-white/8 border-y border-white/8 bg-white/[0.01] rounded-[24px] backdrop-blur-sm">
             {faqs.map((f, i) => (
@@ -984,18 +1046,18 @@ export default function App() {
       </section>
 
       {/* CONTACT */}
-      <section id="contact" className="relative z-10 border-t border-white/5 bg-[#03050c]">
+      <section id="contact" className="scroll-mt-[66px] relative z-10 border-t border-white/5 bg-[#03050c]">
         <div className="mx-auto max-w-[1300px] px-6 md:px-10 py-20 md:py-28">
           <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-14">
             <div>
-              <div className="inline-flex mono text-[9px] tracking-[0.25em] px-3.5 py-1.5 rounded-full border border-emerald-400/15 bg-emerald-400/5 text-emerald-300">● WE'RE UNDER THE SAME SKY</div>
+              <div className="inline-flex mono text-[10px] md:text-[9px] tracking-[0.25em] px-3.5 py-1.5 rounded-full border border-emerald-400/15 bg-emerald-400/5 text-emerald-300">● WE'RE UNDER THE SAME SKY</div>
               <h3 className="serif text-[56px] md:text-[88px] leading-[0.85] mt-8">Reach for<br />the stars.</h3>
 
               <div className="mt-10 flex flex-wrap gap-2.5">
                 {socialLinks.map((s: any) => (
                   <a data-cursor="FOLLOW" key={s.k} href={s.href} target="_blank" className="group flex items-center gap-2.5 h-[46px] px-5 rounded-full border border-white/8 bg-white/[0.03] hover:bg-white hover:text-black transition duration-300">
                     <span className="w-7 h-7 rounded-full bg-white/10 group-hover:bg-black/10 grid place-items-center transition">{Icons[s.k as keyof typeof Icons]({ className: "w-[15px] h-[15px]" })}</span>
-                    <span className="mono text-[10px] tracking-[0.15em]">{s.label}</span>
+                    <span className="mono text-[11px] md:text-[10px] tracking-[0.15em]">{s.label}</span>
                   </a>
                 ))}
               </div>
@@ -1024,15 +1086,15 @@ export default function App() {
                 <input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" />
 
                 <div className="grid md:grid-cols-2 gap-4">
-                  <label className="grid gap-1.5"><span className="mono text-[9px] tracking-[0.15em] opacity-40">YOUR NAME</span><input required name="name" className="h-[48px] rounded-full bg-[#060812] border border-white/10 px-5 mono text-[12px] outline-none focus:border-white/25 transition" placeholder="Carl Sagan" /></label>
-                  <label className="grid gap-1.5"><span className="mono text-[9px] tracking-[0.15em] opacity-40">EMAIL</span><input required type="email" name="email" className="h-[48px] rounded-full bg-[#060812] border border-white/10 px-5 mono text-[12px] outline-none focus:border-white/25 transition" placeholder="you@manipal.edu" /></label>
+                  <label className="grid gap-1.5"><span className="mono text-[11px] md:text-[9px] tracking-[0.15em] opacity-50 md:opacity-40">YOUR NAME</span><input required name="name" className="h-[48px] rounded-full bg-[#060812] border border-white/10 px-5 mono text-[16px] md:text-[12px] outline-none focus:border-white/25 transition" placeholder="Carl Sagan" /></label>
+                  <label className="grid gap-1.5"><span className="mono text-[11px] md:text-[9px] tracking-[0.15em] opacity-50 md:opacity-40">EMAIL</span><input required type="email" name="email" className="h-[48px] rounded-full bg-[#060812] border border-white/10 px-5 mono text-[16px] md:text-[12px] outline-none focus:border-white/25 transition" placeholder="you@manipal.edu" /></label>
                 </div>
-                <label className="grid gap-1.5"><span className="mono text-[9px] tracking-[0.15em] opacity-40">INTEREST</span>
-                  <select name="interest" className="h-[48px] rounded-full bg-[#060812] border border-white/10 px-5 mono text-[12px] outline-none">
+                <label className="grid gap-1.5"><span className="mono text-[11px] md:text-[9px] tracking-[0.15em] opacity-50 md:opacity-40">INTEREST</span>
+                  <select name="interest" className="h-[48px] rounded-full bg-[#060812] border border-white/10 px-5 mono text-[16px] md:text-[12px] outline-none">
                     <option>Stargazing Nights</option><option>Research Assistance</option><option>Astrophotography</option><option>Telescope Build</option><option>Content / Outreach</option><option>Others</option>
                   </select>
                 </label>
-                <label className="grid gap-1.5"><span className="mono text-[9px] tracking-[0.15em] opacity-40">MESSAGE</span><textarea required name="message" rows={4} className="rounded-[20px] bg-[#060812] border border-white/10 p-5 mono text-[12px] outline-none focus:border-white/25 transition resize-none" placeholder="Tell us why you look up at night..." /></label>
+                <label className="grid gap-1.5"><span className="mono text-[11px] md:text-[9px] tracking-[0.15em] opacity-50 md:opacity-40">MESSAGE</span><textarea required name="message" rows={4} className="rounded-[20px] bg-[#060812] border border-white/10 p-5 mono text-[16px] md:text-[12px] outline-none focus:border-white/25 transition resize-none" placeholder="Tell us why you look up at night..." /></label>
 
                 <Magnetic data-cursor="SEND" disabled={status === "sending"} className="mt-1 h-[50px] rounded-full bg-white text-black mono text-[11px] tracking-[0.15em] hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] disabled:opacity-60">
                   {status === "sending" ? "SENDING..." : "SEND MESSAGE →"}
@@ -1045,28 +1107,39 @@ export default function App() {
             </div>
           </div>
 
-          <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-4 mono text-[9px] tracking-[0.2em] opacity-30">
+          <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-4 mono text-[11px] md:text-[9px] tracking-[0.2em] opacity-40 md:opacity-30">
             <div>© {new Date().getFullYear()} THE ASTRONOMY CLUB, MANIPAL, MIT</div>
-            <div className="flex gap-6"> Made with ❤️ by<a href="https://www.instagram.com/pxlbyt/" data-cursor="pxlbyt">Siddharth. S</a></div>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-1"> 
+              Made with ❤️ by<a href="https://www.instagram.com/pxlbyt/" data-cursor="pxlbyt" className="py-2">Siddharth. S</a>
+              <a href="https://www.instagram.com/khushiagarwl/" data-cursor="Khushi" className="py-2">Khushi Agarwal</a>
+            
+            </div>
           </div>
         </div>
       </section>
 
       {/* LIGHTBOX */}
       {current && (
-        <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-[24px] p-4 md:p-10 flex items-center justify-center" onClick={() => setLightbox(null)}>
-          <div className="max-w-[1100px] w-full grid md:grid-cols-[1.2fr_0.8fr] bg-[#0b0e1a] rounded-[24px] border border-white/15 overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.8)]" onClick={(e) => e.stopPropagation()}>
-            <img src={current.src} alt={current.title} className="w-full h-[60vh] md:h-[82vh] object-contain bg-black" />
-            <div className="p-8 flex flex-col justify-between">
+        <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-[24px] p-3 md:p-10 flex items-start md:items-center justify-center overflow-y-auto" onClick={() => setLightbox(null)}>
+          <div className="max-w-[1100px] w-full grid md:grid-cols-[1.2fr_0.8fr] bg-[#0b0e1a] rounded-[24px] border border-white/15 overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.8)] my-auto" onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+            onTouchEnd={(e) => {
+              if (touchX.current === null) return;
+              const dx = e.changedTouches[0].clientX - touchX.current;
+              if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1); // swipe left = next, right = previous
+              touchX.current = null;
+            }}>
+            <img src={current.src} alt={current.title} className="w-full h-[48vh] md:h-[82vh] object-contain bg-black" />
+            <div className="p-5 md:p-8 flex flex-col justify-between">
               <div>
-                <div className="mono text-[9px] tracking-[0.2em] px-3 py-1.5 rounded-full bg-white text-black inline-block">{current.cat}</div>
-                <h4 className="serif text-[34px] leading-[0.95] mt-6">{current.title}</h4>
+                <div className="mono text-[10px] md:text-[9px] tracking-[0.2em] px-3 py-1.5 rounded-full bg-white text-black inline-block">{current.cat}</div>
+                <h4 className="serif text-[28px] md:text-[34px] leading-[0.95] mt-6">{current.title}</h4>
                 <div className="mono text-[10px] opacity-40 mt-3">{current.date}</div>
                 {current.content && (
                   <p className="mono text-[12px] leading-[1.7] opacity-55 mt-6 whitespace-pre-line">{current.content}</p>
                 )}
               </div>
-              <div className="mt-8 flex items-center gap-3">
+              <div className="mt-6 md:mt-8 flex items-center gap-3">
                 <button data-cursor="PREV" onClick={() => go(-1)} className="w-11 h-11 rounded-full border border-white/15 hover:bg-white hover:text-black transition grid place-items-center">←</button>
                 <button data-cursor="NEXT" onClick={() => go(1)} className="w-11 h-11 rounded-full border border-white/15 hover:bg-white hover:text-black transition grid place-items-center">→</button>
                 <span className="mono text-[10px] tracking-[0.15em] opacity-40">{(lightbox ?? 0) + 1} / {filtered.length}</span>

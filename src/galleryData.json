@@ -7,11 +7,10 @@
     "thumb": "/images/gallery-thumbs/Galaxy/Andromeda.webp",
     "id": 1,
     "content": "Siddharth.S \nTaken through Celestron RASA \nExposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
-
   },
   {
     "cat": "Galaxy",
-    "title": "CigarGalaxy",
+    "title": "Cigar Galaxy",
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Galaxy/CigarGalaxy.jpg",
     "thumb": "/images/gallery-thumbs/Galaxy/CigarGalaxy.webp",
@@ -20,11 +19,20 @@
   },
   {
     "cat": "Galaxy",
-    "title": "Leotrio",
+    "title": "Galaxy",
+    "date": "Oct 14, 2026",
+    "src": "/images/gallery/Galaxy/galaxy.jpg",
+    "thumb": "/images/gallery-thumbs/Galaxy/galaxy.webp",
+    "id": 3
+  },
+  {
+    "cat": "Galaxy",
+    "title": "Leo Trio of Galaxies",
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Galaxy/Leotrio.jpg",
     "thumb": "/images/gallery-thumbs/Galaxy/Leotrio.webp",
-    "id": 3
+    "id": 4,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
   },
   {
     "cat": "Moon",
@@ -32,55 +40,104 @@
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Moon/Moon.png",
     "thumb": "/images/gallery-thumbs/Moon/Moon.webp",
-    "id": 4
+    "id": 5,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
+  },
+  {
+    "cat": "Moon",
+    "title": "Moon",
+    "date": "Jun 29, 2025",
+    "src": "/images/gallery/Moon/rishit-moon.jpeg",
+    "thumb": "/images/gallery-thumbs/Moon/rishit-moon.webp",
+    "id": 6,
+    "content": "Rishit Agarwal \n8 inches Newtonian Telescope \nDEC: -27° 59′ 10.9″"
   },
   {
     "cat": "Nebula",
-    "title": "ButterflyNebula",
+    "title": "Butterfly Nebula",
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Nebula/ButterflyNebula.jpg",
     "thumb": "/images/gallery-thumbs/Nebula/ButterflyNebula.webp",
-    "id": 5
+    "id": 8,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
   },
   {
     "cat": "Nebula",
-    "title": "EagleNebula",
+    "title": "Eagle Nebula",
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Nebula/EagleNebula.png",
     "thumb": "/images/gallery-thumbs/Nebula/EagleNebula.webp",
-    "id": 6
+    "id": 9,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
   },
   {
     "cat": "Nebula",
-    "title": "helix",
+    "title": "Helix Nebula",
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Nebula/helix.jpg",
     "thumb": "/images/gallery-thumbs/Nebula/helix.webp",
-    "id": 7
+    "id": 10,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
   },
   {
     "cat": "Nebula",
-    "title": "Orion",
+    "title": "Orion Nebula",
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Nebula/Orion.png",
     "thumb": "/images/gallery-thumbs/Nebula/Orion.webp",
-    "id": 8
+    "id": 11,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
   },
   {
     "cat": "Nebula",
-    "title": "Rosette",
+    "title": "Rosette Nebula",
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Nebula/Rosette.png",
     "thumb": "/images/gallery-thumbs/Nebula/Rosette.webp",
-    "id": 9
+    "id": 12,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
+  },
+  {
+    "cat": "Moon",
+    "title": "Moon",
+    "date": "Jun 29, 2025",
+    "src": "/images/gallery/Moon/rishit-moon2.jpeg",
+    "thumb": "/images/gallery-thumbs/Moon/rishit-moon2.webp",
+    "id": 7,
+    "content": "Rishit Agarwal \n8 inches Newtonian Telescope \nDEC: -27° 59′ 10.9″"
   },
   {
     "cat": "Night Sky",
-    "title": "Railwaybridge",
+    "title": "Railway Bridge",
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Night%20Sky/Railwaybridge.jpg",
     "thumb": "/images/gallery-thumbs/Night%20Sky/Railwaybridge.webp",
-    "id": 10
+    "id": 13,
+    "content": "Siddharth.S \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
+  },
+  {
+    "cat": "Planet",
+    "title": "Jupiter",
+    "date": "Oct 15, 2026",
+    "src": "/images/gallery/Planet/rishit-jupiter.jpeg",
+    "thumb": "/images/gallery-thumbs/Planet/rishit-jupiter.webp",
+    "id": 14
+  },
+  {
+    "cat": "Planet",
+    "title": "Mars",
+    "date": "Oct 15, 2026",
+    "src": "/images/gallery/Planet/rishit-mars.jpeg",
+    "thumb": "/images/gallery-thumbs/Planet/rishit-mars.webp",
+    "id": 15
+  },
+  {
+    "cat": "Planet",
+    "title": "Saturn",
+    "date": "Oct 15, 2026",
+    "src": "/images/gallery/Planet/rishit-saturn.jpeg",
+    "thumb": "/images/gallery-thumbs/Planet/rishit-saturn.webp",
+    "id": 16
   },
   {
     "cat": "Planet",
@@ -88,14 +145,16 @@
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Planet/Saturn.png",
     "thumb": "/images/gallery-thumbs/Planet/Saturn.webp",
-    "id": 11
+    "id": 17,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
   },
   {
     "cat": "Star Cluster",
-    "title": "SatelliteCluster",
+    "title": "Satellite Cluster",
     "date": "Oct 13, 2026",
     "src": "/images/gallery/Star%20Cluster/SatelliteCluster.jpg",
     "thumb": "/images/gallery-thumbs/Star%20Cluster/SatelliteCluster.webp",
-    "id": 12
+    "id": 18,
+    "content": "Siddharth.S \nTaken through Celestron RASA \n Exposure: 120s\nRA: 00h 42m 44.3s\nDEC: +41° 16′ 9″"
   }
 ]
