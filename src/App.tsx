@@ -897,10 +897,10 @@ export default function App() {
             ))}
           </div>
 
-          <div className="mt-14 rounded-[24px] border border-white/8 bg-gradient-to-br from-[#0e1224] to-[#0b0e1a] p-7 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          {/* <div className="mt-14 rounded-[24px] border border-white/8 bg-gradient-to-br from-[#0e1224] to-[#0b0e1a] p-7 md:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <div className="serif text-[24px] md:text-[32px] leading-[1.05] max-w-[26ch] text-[#c4b5fd] italic">"Astronomy is a humbling reminder that in the vast expanse of the cosmos, our existence is but a fleeting moment, yet our curiosity knows no bounds."</div>
             <div className="mono text-[11px] md:text-[10px] tracking-[0.2em] opacity-40 shrink-0"> TACM MANIFESTO</div>
-          </div>
+          </div> */}
         </div>
       </section>
 
