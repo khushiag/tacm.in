@@ -6,7 +6,7 @@ const catColor: Record<string, string> = {
   Planet: "#e8a55a", "Star Cluster": "#7fd1c7", "Night Sky": "#6b7fd7",
 };
 
-const PAGE = 8; // photos shown per "load more"
+const PAGE = 4; // photos shown per "load more"
 const categories = ["All", ...Array.from(new Set(galleryImages.map((g: any) => g.cat)))];
 
 const Icons = {
@@ -336,11 +336,15 @@ void main(){
     c += vec3(1.0, 0.93, 0.82) * (pow(max(dot(n, H), 0.), 400.) * 1.2 + pow(max(dot(n, H), 0.), 14.) * 0.07 + fres * 0.15) * water * day;
     c = mix(c, vec3(0.96, 0.97, 1.0) * (0.015 + 0.985 * smoothstep(-0.2, 0.5, ndl)), cl * 0.88);
 
-    // Manipal (13.35°N, 74.79°E): a soft gold pulse
+    // Manipal (13.35°N, 74.79°E): a bright gold beacon
     vec3 home = vec3(cos(0.233) * cos(1.305), sin(0.233), -cos(0.233) * sin(1.305));
     float hd = length(ns - home), ph = fract(uTime * 0.35);
-    float pin = exp(-pow(hd / 0.012, 2.)) + 0.6 * exp(-pow((hd - ph * 0.09) / 0.006, 2.)) * (1. - ph);
-    c += vec3(1.0, 0.75, 0.3) * pin * (1. - cl * 0.7) * (0.35 + 0.65 * day);
+    float core = exp(-pow(hd / 0.018, 2.));                                       // solid dot
+    float halo = exp(-pow(hd / 0.06, 2.)) * 0.45;                                 // soft glow around it
+    float wave = exp(-pow((hd - ph * 0.16) / 0.009, 2.)) * (1. - ph);            // expanding ring
+    float pin = core * 1.8 + halo + wave * 1.2;
+    c = mix(c, vec3(1.0, 0.82, 0.35), clamp(core, 0., 1.) * 0.85);              // dot sits on top of land/clouds
+    c += vec3(1.0, 0.75, 0.3) * pin * (1. - cl * 0.3) * (0.6 + 0.4 * day);
 
     // atmosphere: blue limb, haze, sunset band on the terminator
     vec3 atm = mix(sky, dusk, band(ndl, 0., 0.22) * 0.85);
@@ -593,7 +597,7 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen bg-[#03050c] text-[#eaeef6] selection:bg-white selection:text-black antialised overflow-clip">
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;600;800&family=Geist+Mono:wght@300;400;500&display=swap');*{font-family:"Syne",system-ui}.serif{font-family:"Instrument Serif",serif}.mono{font-family:"Geist Mono",monospace}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#ffffff33;border-radius:3px}html{scroll-behavior:smooth}:root{--gold:#f0b94a}.swipe-row{scrollbar-width:none}.swipe-row::-webkit-scrollbar{display:none}${keyframes}`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;600;800&family=Geist+Mono:wght@300;400;500&display=swap');*{font-family:"Syne",system-ui}.serif{font-family:"Instrument Serif",serif}.mono{font-family:"Geist Mono",monospace}::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#ffffff33;border-radius:3px}html{scroll-behavior:smooth}:root{--gold:#f0b94a}.swipe-row{scrollbar-width:none}.swipe-row::-webkit-scrollbar{display:none}.gcard{border:1px solid color-mix(in srgb,var(--c) 45%,transparent);box-shadow:0 0 0 1px rgba(0,0,0,.6),0 12px 30px rgba(0,0,0,.55),0 0 18px color-mix(in srgb,var(--c) 12%,transparent);transition:border-color .3s,box-shadow .3s}.gcard:hover{border-color:var(--c);box-shadow:0 0 0 1px rgba(0,0,0,.6),0 12px 30px rgba(0,0,0,.55),0 0 28px color-mix(in srgb,var(--c) 40%,transparent)}${keyframes}`}</style>
 
       <CustomCursor />
       <StarField />
@@ -622,9 +626,9 @@ export default function App() {
               <div className="mono text-[10px] tracking-[0.3em] opacity-40 mt-1.5">MANIPAL - MIT</div>
             </div>
           </a>
-          <div className="hidden md:flex items-center gap-9 mono text-[10.5px] tracking-[0.2em]">
+          <div className="hidden md:flex items-center gap-9 mono text-[11.5px] tracking-[0.2em]">
             {["#about","#events","#projects","#gallery","#team","#contact"].map((href,i)=>(
-              <a key={href} data-cursor="GO" href={href} className="opacity-50 hover:opacity-100 transition relative after:absolute after:bottom-[-3px] after:left-0 after:w-0 after:h-px after:bg-white after:transition-all hover:after:w-full">{["ABOUT","EVENTS","PROJECTS","GALLERY","TEAM","CONTACT"][i]}</a>
+              <a key={href} data-cursor="GO" href={href} className="opacity-80 hover:opacity-100 transition relative after:absolute after:bottom-[-3px] after:left-0 after:w-0 after:h-px after:bg-white after:transition-all hover:after:w-full">{["ABOUT","EVENTS","PROJECTS","GALLERY","TEAM","CONTACT"][i]}</a>
             ))}
           </div>
             <div className="hidden sm:flex items-center gap-2">
@@ -812,7 +816,7 @@ export default function App() {
               <div className="mono text-[15px] tracking-[0.35em] text-[var(--gold)] flex items-center gap-3"><span className="w-10 h-px bg-[var(--gold)] opacity-60" /> ABOUT</div>
               <h2 className="serif text-[44px] md:text-[70px] leading-[0.92] tracking-[-0.02em] mt-6">
                 We look up<br />
-                <span className="italic opacity-50 text-[#c4b5fd]">to feel small</span>
+                <span className="italic opacity-50 text-[#c4b5fd]">to feel small,</span>
                 <br />precise, infinite.
               </h2>
             </div>
@@ -874,7 +878,7 @@ export default function App() {
 
 
       {/* PROJECTS */}
-      <section id="projects" className="scroll-mt-[66px] relative z-10 py-14 md:py-20 bg-[#080a15] border-y border-white/5">
+      <section id="projects" className="scroll-mt-[66px] relative z-10 py-14 md:py-8 bg-[#080a15] border-y border-white/5">
         <div className="mx-auto max-w-[1300px] px-6 md:px-10">
           <div className="mono text-[15px] tracking-[0.35em] text-[var(--gold)] flex items-center gap-3"><span className="w-10 h-px bg-[var(--gold)] opacity-60" /> PROJECTS</div>
           <div className="swipe-row mt-10 -mx-6 px-6 md:mx-0 md:px-0 flex md:grid md:grid-cols-3 gap-4 md:gap-5 overflow-x-auto md:overflow-visible snap-x snap-mandatory">
@@ -905,7 +909,7 @@ export default function App() {
       </section>
 
       {/* GALLERY */}
-      <section id="gallery" className="scroll-mt-[66px] relative z-10 py-14 md:py-20">
+      <section id="gallery" className="scroll-mt-[66px] relative z-10 py-14 md:py-10">
         <div className="mx-auto max-w-[1300px] px-6 md:px-10">
           <div className="flex flex-wrap gap-6 items-end justify-between">
             <div>
@@ -928,7 +932,7 @@ export default function App() {
 
           {filtered.length === 0 ? (
             <div className="mt-14 mono text-[11px] tracking-[0.2em] opacity-40 text-center py-20 border border-dashed border-white/10 rounded-[20px]">
-              NO PHOTOS YET. ADD IMAGES TO public/images/gallery AND RUN npm run gallery
+              NO PHOTOS YET
             </div>
           ) : (
             <div className="mt-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
@@ -937,7 +941,8 @@ export default function App() {
                   key={g.id}
                   data-cursor="ZOOM"
                   onClick={() => setLightbox(i)}
-                  className="group relative aspect-[4/5] rounded-[20px] overflow-hidden border border-white/8 bg-[#0b0e1a] cursor-pointer"
+                  style={{ "--c": "#8fb8ff" } as React.CSSProperties}
+                  className="gcard group relative aspect-[4/5] rounded-[20px] overflow-hidden bg-[#0b0e1a] cursor-pointer"
                 >
                   <img
                     src={g.thumb}
@@ -965,12 +970,12 @@ export default function App() {
 
           {filtered.length > 0 && (
             <div className="mt-12 flex flex-col items-center gap-4">
-              <div className="mono text-[10px] tracking-[0.2em] opacity-40">SHOWING {shown.length} OF {filtered.length}</div>
+              <div className="mono text-[12px] tracking-[0.2em] opacity-40">SHOWING {shown.length} OF {filtered.length}</div>
               {visible < filtered.length && (
                 <button
                   data-cursor="MORE"
                   onClick={() => setVisible((v) => v + PAGE)}
-                  className="h-[46px] px-7 rounded-full border border-white/12 bg-white/[0.03] hover:bg-white hover:text-black transition mono text-[11px] tracking-[0.15em]"
+                  className="h-[46px] px-7 rounded-full border border-white/42 bg-white/[0.03] hover:bg-white hover:text-black transition mono text-[11px] tracking-[0.15em]"
                 >
                   LOAD MORE
                 </button>
@@ -1026,7 +1031,7 @@ export default function App() {
       </section>
 
       {/* FAQ */}
-      <section className="relative z-10 py-15 md:py-20">
+      <section className="relative z-10 py-15 md:py-10">
         <div className="mx-auto max-w-[1300px] px-6 md:px-10 grid md:grid-cols-[0.8fr_1.2fr] gap-14">
           <div className="md:sticky md:top-[30vh] self-start">
             <div className="mono text-[15px] tracking-[0.35em] text-[var(--gold)] flex items-center gap-3"><span className="w-10 h-px bg-[var(--gold)] opacity-60" /> FAQ</div>
@@ -1111,12 +1116,11 @@ export default function App() {
             </div>
           </div>
 
-          <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-4 mono text-[11px] md:text-[9px] tracking-[0.2em] opacity-40 md:opacity-30">
+          <div className="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-4 mono text-[11px] md:text-[9px] tracking-[0.2em] opacity-40 md:opacity-60">
             <div>© {new Date().getFullYear()} THE ASTRONOMY CLUB, MANIPAL, MIT</div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-1"> 
-              Made with ❤️ by<a href="https://www.instagram.com/pxlbyt/" data-cursor="pxlbyt" className="py-2">Siddharth. S</a>
-              <a href="https://www.instagram.com/khushiagarwl/" data-cursor="Khushi" className="py-2">Khushi Agarwal</a>
-            
+              Made with ❤️ by<a href="https://www.instagram.com/pxlbyt/" target="_blank" rel="noopener noreferrer" data-cursor="pxlbyt" className="py-2">Siddharth. S</a>
+              <a href="https://www.linkedin.com/in/khushiagarwl/" target="_blank" rel="noopener noreferrer" data-cursor="Khushi" className="py-2">Khushi Agarwal</a>
             </div>
           </div>
         </div>
@@ -1125,7 +1129,7 @@ export default function App() {
       {/* LIGHTBOX */}
       {current && (
         <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-[24px] p-3 md:p-10 flex items-start md:items-center justify-center overflow-y-auto" onClick={() => setLightbox(null)}>
-          <div className="max-w-[1100px] w-full grid md:grid-cols-[1.2fr_0.8fr] bg-[#0b0e1a] rounded-[24px] border border-white/15 overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.8)] my-auto" onClick={(e) => e.stopPropagation()}
+          <div className="max-w-[1100px] w-full grid md:grid-cols-[1.2fr_0.8fr] bg-[#0b0e1a] rounded-[24px] border border-[#8fb8ff]/85 overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.8)] my-auto" onClick={(e) => e.stopPropagation()}
             onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
             onTouchEnd={(e) => {
               if (touchX.current === null) return;
